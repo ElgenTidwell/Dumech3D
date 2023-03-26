@@ -1,0 +1,53 @@
+#   state name - sprite base - direction - offset - action - next state - ticks
+SHTG_READY00 /Shotgun/shotgun_3d_spr f 1 WEAPON_RDY SHTG_READY00 500
+#   WEAPON_PFR = weapon prefire, we use this state to tell the game which state is the beginning of the shoot animation.
+#   WEAPON_NNE = weapon none, self explanitory
+#   WEAPON_RDY = weapon ready, again self explanitory
+#   WEAPON_FRE = weapon fire, this is the state in which the weapon actually shoots.
+SHTG_SHOOT01 /Shotgun/shotgun_3d_spr f 2 WEAPON_PFR SHTG_SHOOT02 1
+SHTG_SHOOT02 /Shotgun/shotgun_3d_spr f 3 WEAPON_NNE SHTG_SHOOT03 1
+SHTG_SHOOT03 /Shotgun/shotgun_3d_spr f 4 WEAPON_FRE SHTG_SHOOT05 3
+SHTG_SHOOT05 /Shotgun/shotgun_3d_spr f 5 WEAPON_NNE SHTG_SHOOT06 2
+SHTG_SHOOT06 /Shotgun/shotgun_3d_spr f 6 WEAPON_NNE SHTG_SHOOT07 2
+SHTG_SHOOT07 /Shotgun/shotgun_3d_spr f 7 WEAPON_NNE SHTG_SHOOT08 2
+SHTG_SHOOT08 /Shotgun/shotgun_3d_spr f 8 WEAPON_NNE SHTG_SHOOT09 1
+SHTG_SHOOT09 /Shotgun/shotgun_3d_spr f 9 WEAPON_NNE SHTG_SHOOT10 1
+SHTG_SHOOT10 /Shotgun/shotgun_3d_spr f 10 WEAPON_NNE SHTG_SHOOT11 1
+SHTG_SHOOT11 /Shotgun/shotgun_3d_spr f 11 WEAPON_NNE SHTG_SHOOT12 1
+SHTG_SHOOT12 /Shotgun/shotgun_3d_spr f 12 WEAPON_NNE SHTG_SHOOT13 1
+SHTG_SHOOT13 /Shotgun/shotgun_3d_spr f 13 WEAPON_NNE SHTG_SHOOT14 1
+SHTG_SHOOT14 /Shotgun/shotgun_3d_spr f 14 WEAPON_NNE SHTG_SHOOT15 1
+SHTG_SHOOT15 /Shotgun/shotgun_3d_spr f 15 WEAPON_NNE SHTG_SHOOT16 1
+SHTG_SHOOT16 /Shotgun/shotgun_3d_spr f 16 WEAPON_NNE SHTG_SHOOT17 1
+SHTG_SHOOT17 /Shotgun/shotgun_3d_spr f 17 WEAPON_NNE SHTG_SHOOT18 1
+SHTG_SHOOT18 /Shotgun/shotgun_3d_spr f 18 WEAPON_NNE SHTG_SHOOT19 1
+SHTG_SHOOT19 /Shotgun/shotgun_3d_spr f 19 WEAPON_NNE SHTG_SHOOT20 1
+SHTG_SHOOT20 /Shotgun/shotgun_3d_spr f 20 WEAPON_NNE SHTG_SHOOT21 1
+SHTG_SHOOT21 /Shotgun/shotgun_3d_spr f 21 WEAPON_NNE SHTG_SHOOT22 1
+SHTG_SHOOT22 /Shotgun/shotgun_3d_spr f 22 WEAPON_NNE SHTG_SHOOT23 1
+SHTG_SHOOT23 /Shotgun/shotgun_3d_spr f 23 WEAPON_NNE SHTG_SHOOT24 1
+SHTG_SHOOT24 /Shotgun/shotgun_3d_spr f 24 WEAPON_NNE SHTG_SHOOT25 1
+SHTG_SHOOT25 /Shotgun/shotgun_3d_spr f 25 WEAPON_NNE SHTG_SHOOT26 1
+SHTG_SHOOT26 /Shotgun/shotgun_3d_spr f 26 WEAPON_NNE SHTG_SHOOT27 1
+SHTG_SHOOT27 /Shotgun/shotgun_3d_spr f 27 WEAPON_NNE SHTG_SHOOT28 1
+SHTG_SHOOT28 /Shotgun/shotgun_3d_spr f 28 WEAPON_NNE SHTG_SHOOT29 1
+SHTG_SHOOT29 /Shotgun/shotgun_3d_spr f 29 WEAPON_NNE SHTG_SHOOT30 1
+SHTG_SHOOT30 /Shotgun/shotgun_3d_spr f 30 WEAPON_NNE SHTG_SHOOT31 1
+SHTG_SHOOT31 /Shotgun/shotgun_3d_spr f 31 WEAPON_NNE SHTG_SHOOT32 1
+SHTG_SHOOT32 /Shotgun/shotgun_3d_spr f 32 WEAPON_NNE SHTG_SHOOT33 1
+SHTG_SHOOT33 /Shotgun/shotgun_3d_spr f 33 WEAPON_NNE SHTG_SHOOT34 1
+SHTG_SHOOT34 /Shotgun/shotgun_3d_spr f 34 WEAPON_NNE SHTG_SHOOT35 1
+SHTG_SHOOT35 /Shotgun/shotgun_3d_spr f 35 WEAPON_NNE SHTG_SHOOT36 1
+SHTG_SHOOT36 /Shotgun/shotgun_3d_spr f 36 WEAPON_NNE SHTG_SHOOT37 1
+SHTG_SHOOT37 /Shotgun/shotgun_3d_spr f 37 WEAPON_NNE SHTG_SHOOT38 1
+SHTG_SHOOT38 /Shotgun/shotgun_3d_spr f 38 WEAPON_NNE SHTG_SHOOT39 1
+SHTG_SHOOT39 /Shotgun/shotgun_3d_spr f 39 WEAPON_RDY SHTG_SHOOT40 1
+SHTG_SHOOT40 /Shotgun/shotgun_3d_spr f 40 WEAPON_RDY SHTG_SHOOT41 1
+SHTG_SHOOT41 /Shotgun/shotgun_3d_spr f 41 WEAPON_RDY SHTG_SHOOT42 1
+SHTG_SHOOT42 /Shotgun/shotgun_3d_spr f 42 WEAPON_RDY SHTG_SHOOT43 1
+SHTG_SHOOT43 /Shotgun/shotgun_3d_spr f 43 WEAPON_RDY SHTG_SHOOT44 1
+SHTG_SHOOT44 /Shotgun/shotgun_3d_spr f 44 WEAPON_RDY SHTG_SHOOT45 1
+SHTG_SHOOT45 /Shotgun/shotgun_3d_spr f 45 WEAPON_RDY SHTG_SHOOT46 1
+SHTG_SHOOT46 /Shotgun/shotgun_3d_spr f 46 WEAPON_RDY SHTG_SHOOT47 1
+SHTG_SHOOT47 /Shotgun/shotgun_3d_spr f 47 WEAPON_RDY SHTG_SHOOT48 1
+SHTG_SHOOT48 /Shotgun/shotgun_3d_spr f 48 WEAPON_RDY SHTG_READY00 2

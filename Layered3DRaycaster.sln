@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.32002.261
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Layered3DRaycaster", "Layered3DRaycaster.csproj", "{EF00A9FC-320F-44D8-8175-958848C82F33}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EF00A9FC-320F-44D8-8175-958848C82F33}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF00A9FC-320F-44D8-8175-958848C82F33}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF00A9FC-320F-44D8-8175-958848C82F33}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF00A9FC-320F-44D8-8175-958848C82F33}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DBC3015F-2D19-43E1-B08D-C5B31367F6C3}
+	EndGlobalSection
+EndGlobal

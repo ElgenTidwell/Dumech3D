@@ -1,0 +1,2 @@
+#   state name - sprite base - direction - offset - action - next state - ticks
+ZOMB_STAND01 /Zombie/zomb t 1 MONSTER_IDL ZOMB_STAND01 5
