@@ -70,7 +70,7 @@ namespace Thinkers
         }
         void P_NewChaseDir(float dt)
         {
-            movecount = pRandom.GetRandom()&35;
+            movecount = pRandom.GetRandom()&25;
             Console.WriteLine(movecount);
 
             Vector3 targetPos = Program.instance.activeThings[target].GetPosition();

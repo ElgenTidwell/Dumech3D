@@ -10,13 +10,9 @@ namespace Thinkers
         protected bool onGround, wasOnGround;
         public Tex sprite;
 
-        public p_bobj()
-        {
-            P_RecalculateDir();
-        }
-
         public override void T_Think(float deltaTime)
         {
+            P_RecalculateDir();
             P_Move(deltaTime);
         }
 
