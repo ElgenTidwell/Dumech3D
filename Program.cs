@@ -23,7 +23,7 @@ public class Program
 	}
 	public static string mapPath = $"{basePath}/Maps/";
 	public const int screenHeight = 225, screenWidth = 400;
-	const int tickrate = 50;
+	const int tickrate = 45;
 	const float tickLengthInSeconds = 1f/tickrate;
 	int mapWidth = 24, mapHeight = 24, mapLayers = 3;
 	int[,,] worldMap = new int[0,0,0];

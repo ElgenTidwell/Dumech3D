@@ -6,15 +6,22 @@ public abstract class Thinker
 {
     public Thing myThing;
     public abstract void T_Think(float deltaTime);
+    public abstract void T_Destroy();
 }
 public class Thing
 {
     protected Thinker thinker;
     protected rect body;
     public float dirX=-1,dirY=0;
+    public float angularDirection;
     public int id
     {
         get; protected set;
+    }
+
+    public void Destroy()
+    {
+        thinker.T_Destroy();
     }
 
     public Vector2 GetHeading() => new Vector2(dirX,dirY);

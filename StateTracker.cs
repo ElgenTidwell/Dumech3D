@@ -20,6 +20,7 @@ namespace States
         string currentState;
         public int tick = 0;
         public int directionToCamera = -1;
+        public Action onSpriteChanged;
 
         public StateTracker(string path, bool isDirectional, bool loadAllTextures = false)
         {
@@ -101,6 +102,7 @@ namespace States
             if(tick >= 250) tick = 1;
             if(tick>states[currentState].ticks)
             {
+                onSpriteChanged.Invoke();
                 LoadCurrentSprite(directionToCamera);
                 currentState = states[currentState].nextState;
                 tick = 1;

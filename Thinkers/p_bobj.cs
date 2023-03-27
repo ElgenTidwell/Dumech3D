@@ -10,9 +10,23 @@ namespace Thinkers
         protected bool onGround, wasOnGround;
         public Tex sprite;
 
+        public p_bobj()
+        {
+            P_RecalculateDir();
+        }
+
         public override void T_Think(float deltaTime)
         {
             P_Move(deltaTime);
+        }
+
+        public void P_RecalculateDir()
+        {
+            if(myThing.id != 0)
+            {
+                myThing.dirX = MathF.Sin(myThing.angularDirection*Mths.D2R);
+                myThing.dirY = MathF.Cos(myThing.angularDirection*Mths.D2R);
+            }
         }
         public void P_Move(float deltaTime)
         {
@@ -52,6 +66,10 @@ namespace Thinkers
             updated.pos.Z += (float)updated.velocity.Z;
             updated.pos.Z = MathF.Max(updated.size.Z, updated.pos.Z);
             myThing.SetBody(updated);
+        }
+
+        public override void T_Destroy()
+        {
         }
     }
 }

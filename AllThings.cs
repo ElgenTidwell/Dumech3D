@@ -20,4 +20,4 @@ public class Zombie : Thing
     { body = new rect{size = new Vector3(0.15f,0.15f,0.25f)}; thinker = new p_mobj("zombie"); thinker.myThing = this; id = 2;}
 }
 
-public class NullThinker : Thinker { public override void T_Think(float deltaTime){} }
+public class NullThinker : Thinker { public override void T_Think(float deltaTime){} public override void T_Destroy(){} }
