@@ -77,6 +77,10 @@ public class LevelEditor
             {
                 hoveringThing = i;
             }
+            else if(Raylib.IsMouseButtonPressed(MouseButton.MOUSE_BUTTON_LEFT) && selectedThing >= 0)
+            {
+                selectedThing = -1;
+            }
 
             Color col = new Color(0,255,155,255);
             if(hoveringThing == i) col = new Color(255,150,50,255);
@@ -158,7 +162,7 @@ public class LevelEditor
             }
         }
 
-        //Left panel (thing panel)
+        //TODO: Left panel (thing panel)
         {
 
         }

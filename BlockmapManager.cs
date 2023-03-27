@@ -6,6 +6,7 @@ using Raylib_CsLo;
 public static class BlockmapManager
 {
     public static Dictionary<Vector2SByte,List<Thing>> blockmap = new Dictionary<Vector2SByte, List<Thing>>();
+    //this is measured in map tiles, 8 seems like a pretty alright number.
     public const byte BlockWidth = 8,BlockHeight = 8;
 
     private static Vector2 blockmapOffset,size;

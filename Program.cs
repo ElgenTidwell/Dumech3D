@@ -105,6 +105,18 @@ public class Program
 
 		BlockmapManager.InitBlockmap(new Vector2(MathF.Ceiling(mapWidth/BlockmapManager.BlockWidth)+1,MathF.Ceiling(mapHeight/BlockmapManager.BlockHeight)+1),map.blockmapOffset);
 	}
+	public void UnloadMap()
+	{
+		sw.Stop();
+
+		foreach(Thing thing in activeThings)
+		{
+			thing.Destroy();
+		}
+		activeThings.Clear();
+		shutdownSource.Cancel();
+		shutdownSource.Dispose();
+	}
 
 	static unsafe void Main(string[] args)
 	{
@@ -202,14 +214,7 @@ public class Program
 			}
 		}
 
-		instance.sw.Stop();
-
-		foreach(Thing thing in instance.activeThings)
-		{
-			thing.Destroy();
-		}
-		shutdownSource.Cancel();
-		shutdownSource.Dispose();
+		instance.UnloadMap();
 
 		Raylib.StopAudioStream(stream);
 		Raylib.EnableCursor();
@@ -225,6 +230,7 @@ public class Program
 			Raylib.EnableCursor();
 			l.Init(instance);
 			s.Stop();
+			instance.UnloadMap();
 		}
 
 		Raylib.BeginDrawing();
@@ -249,7 +255,7 @@ public class Program
 
 		instance.SpriteRender();
 
-		/*{ experimental threading, kinda sucks
+		/*{ experimental threading, kinda sucks. Need to do more research.. (maybe you all can help?)
 			screenpool[0] = Task.Run(()=>DrawBackground(0),shutdown);
 			screenpool[1] = Task.Run(()=>DrawBackground(1),shutdown);
 			screenpool[2] = Task.Run(()=>DrawBackground(2),shutdown);
@@ -320,22 +326,20 @@ public class Program
 			}
 		}
 
-		foreach(Thing thing in BlockmapManager.GetBlockContentsFromMapPoint((int)instance.activeThings[0].GetPosition().X,(int)instance.activeThings[0].GetPosition().Y))
-		{
-			Raylib.DrawRectangle((int)(thing.GetPosition().X*15),(int)(thing.GetPosition().Y*15),15,15,Raylib.RED);
-		}
+		//  devZ is good for debugging culling and whatnot, so if you need to do that uncomment these two lines.
 
-		if(Raylib.IsKeyDown(KeyboardKey.KEY_UP)) instance.devZ += 0.01f;
-		if(Raylib.IsKeyDown(KeyboardKey.KEY_DOWN)) instance.devZ -= 0.01f;
+		//if(Raylib.IsKeyDown(KeyboardKey.KEY_UP)) instance.devZ += 0.01f;
+		//if(Raylib.IsKeyDown(KeyboardKey.KEY_DOWN)) instance.devZ -= 0.01f;
+
+		//  only enable this if shit gets weird with the blockmap
 
 		//BlockmapManager.DebugBlockmap();
-
-		Raylib.DrawRectangle((int)(instance.activeThings[0].GetPosition().X*15),(int)(instance.activeThings[0].GetPosition().Y*15),15,15,Raylib.GREEN);
 
 		Raylib.DrawFPS(100,100);
 		Raylib.EndDrawing();
 	}
 
+	//this is part of the threading thing, again i need to look more into it.
 	static void DrawBackground(int quarter)
 	{
 		quartersFinished[quarter] = false;
@@ -738,6 +742,7 @@ public class Program
 		return current + a / magnitude * maxDistanceDelta;
 	}
 
+	//this doesnt really have to be a seperate function at the moment but there may be something later where this comes in handy.
 	void Raycast(int x)
 	{
 		for (int z = 0; z < mapLayers; z++)
@@ -844,18 +849,17 @@ public class Program
 			if (mapX < -1 || mapY < -1 || mapX > mapWidth || mapY > mapHeight) return;
 
 			int checkX = mapX,checkY = mapY;
-			bool renderingouter;
+
+			//fake an extra wall padding the map, otherwise ceilings and floors that are at the edge of the map dont render.
 
 			if((mapX == mapWidth || mapY == mapHeight) || (mapX == -1 || mapY == -1))
 			{
 				hit = 0;
 				checkX = Mths.Clamp(mapX,0,mapWidth-1);
 				checkY = Mths.Clamp(mapY,0,mapHeight-1);
-				renderingouter = true;
 			}else
 			{
 				hit = worldMap[z,mapX, mapY];
-				renderingouter = false;
 			}
 
 			if(hit != 0) lastRayDist = rayDist;
@@ -1048,6 +1052,7 @@ public class Program
 					zbuffer[_x, y] = dist;
 				}
 
+				//i want to draw a floor and ceiling instead of solid gray, but it doesnt work well. Leaving this here just in case.
 				void DrawFloor(int y,int fromz,float dist)
 				{
 					zbuffer[x, y] = 1000;
@@ -1219,10 +1224,7 @@ public class Program
 		public int mapval;
 	}
 
-	float Lerp(float firstFloat, float secondFloat, float by)
-	{
-		return firstFloat * (1 - by) + secondFloat * by;
-	}
+	float Lerp(float firstFloat, float secondFloat, float by) => Mths.Lerp(firstFloat,secondFloat,by);
 }
 public struct hitInfo
 {
