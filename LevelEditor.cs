@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Reflection;
 using Raylib_CsLo;
 public class LevelEditor
 {
     int activeLayer = 0;
-    float zoom = 6f, xoff = 0,yoff = 0;
+    float zoom = 100f, xoff = -50,yoff = -50;
     float totalTime;
     Map copy;
     List<Thing> things = new List<Thing>();
@@ -52,7 +53,8 @@ public class LevelEditor
                     
                     if(x == (int)((mousepos.X-xoff)/zoom) && y == (int)((mousepos.Y-yoff)/zoom) && z == activeLayer)
                     {
-                        Raylib.DrawRectangle((int)((x)*zoom+xoff),(int)((y)*zoom+yoff),(int)zoom,(int)zoom,new Color(255,255,255,150));
+                        Raylib.DrawRectangle((int)MathF.Round((x)*zoom+xoff),(int)MathF.Round((y)*zoom+yoff),
+                                    (int)MathF.Round(zoom),(int)MathF.Round(zoom),new Color(255,255,255,150));
 
                         if(selectedThing >= 0) continue;
 
@@ -87,7 +89,12 @@ public class LevelEditor
             if(selectedThing == i) col = new Color(100+(int)MathF.Abs(MathF.Sin(totalTime/10)*155),0,0,255);
             
             Raylib.DrawRectangle((int)((offsetPos.X)*zoom+xoff),(int)((offsetPos.Y)*zoom+yoff),(int)rectWidth.X,(int)rectWidth.Y,col);
-            RayGui.GuiLabel(new Rectangle((int)((offsetPos.X)*zoom+xoff),(int)((offsetPos.Y)*zoom+yoff),100,20),things[i].GetType().ToString());
+
+            if(selectedThing == i || hoveringThing == i)
+            {
+                Raylib.DrawRectangle((int)((offsetPos.X)*zoom+xoff),(int)((offsetPos.Y)*zoom+yoff),things[i].GetType().ToString().Length*8,20,Raylib.WHITE);
+                RayGui.GuiLabel(new Rectangle((int)((offsetPos.X)*zoom+xoff),(int)((offsetPos.Y)*zoom+yoff),100,20),things[i].GetType().ToString());
+            }
         }
 
         if(Raylib.IsKeyPressed(KeyboardKey.KEY_UP)) activeLayer++;
@@ -117,8 +124,22 @@ public class LevelEditor
             }
         }
 
-        if(Raylib.GetMouseWheelMove() > 0) zoom *= 1.1f;
-        if(Raylib.GetMouseWheelMove() < 0) zoom *= 0.9f;
+        if(Raylib.GetMouseWheelMove() > 0)
+        {
+            float deltaZoom = zoom*1.125f;
+            xoff += (Raylib.GetMousePosition().X/deltaZoom-Raylib.GetMousePosition().X/zoom)*zoom;
+            yoff += (Raylib.GetMousePosition().Y/deltaZoom-Raylib.GetMousePosition().Y/zoom)*zoom;
+            zoom = deltaZoom;
+        }
+        if(Raylib.GetMouseWheelMove() < 0)
+        {
+            float deltaZoom = zoom*0.875f;
+
+            xoff += (Raylib.GetMousePosition().X/deltaZoom-Raylib.GetMousePosition().X/zoom)*zoom;
+            yoff += (Raylib.GetMousePosition().Y/deltaZoom-Raylib.GetMousePosition().Y/zoom)*zoom;
+
+            zoom = deltaZoom;
+        }
 
         activeLayer = Mths.Clamp(activeLayer,0,copy.height-1);
 
@@ -162,9 +183,14 @@ public class LevelEditor
             }
         }
 
-        //TODO: Left panel (thing panel)
+        //TODO: Left panel (thing panel, top half placer)
         {
-
+            
+        }
+        //Left panel (thing panel, bottom half editor)
+        if(selectedThing > 0)
+        {
+            
         }
     }
 }
