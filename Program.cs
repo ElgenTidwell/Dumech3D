@@ -77,8 +77,6 @@ public class Program
 	static Task[] screenpool;
 	static Object screenLock;
 	static bool[] quartersFinished;
-	static CancellationToken shutdown;
-	static CancellationTokenSource shutdownSource;
 
 	public void LoadMap(string path)
 	{
@@ -114,8 +112,6 @@ public class Program
 			thing.Destroy();
 		}
 		activeThings.Clear();
-		shutdownSource.Cancel();
-		shutdownSource.Dispose();
 	}
 
 	static unsafe void Main(string[] args)
@@ -123,9 +119,6 @@ public class Program
 		screenLock = new Object();
 		screenpool = new Task[4];
 		quartersFinished = new bool[4];
-
-		shutdownSource = new CancellationTokenSource();
-		shutdown = shutdownSource.Token;
 
 		Raylib.SetConfigFlags(ConfigFlags.FLAG_WINDOW_UNDECORATED);
 		Raylib.InitWindow(screenWidth* screenScalar, screenHeight* screenScalar, "layers!");
@@ -224,15 +217,15 @@ public class Program
 
 	static void RunGame(LevelEditor l, MidiFileSequencer s)
 	{
-		if(Raylib.IsKeyPressed(KeyboardKey.KEY_PERIOD))
+		if(Raylib.IsKeyReleased(KeyboardKey.KEY_PERIOD))
 		{
 			instance.state = PlayState.leveleditor;
 			Raylib.EnableCursor();
 			l.Init(instance);
 			s.Stop();
 			instance.UnloadMap();
+			return;
 		}
-
 		Raylib.BeginDrawing();
 
 		((p_playermobj)(instance.activeThings[0].GetThinker())).P_Mouseinput();
@@ -292,7 +285,6 @@ public class Program
 			instance.Raycast(x);
 			for(int y = 0; y < screenHeight; y++)
 			{
-				if(shutdown.IsCancellationRequested) return;
 				if(instance.screenTextures.Count>0)
 				for(int i = instance.screenTextures.Count-1; i >= 0; i --)
 				{
@@ -343,13 +335,11 @@ public class Program
 	static void DrawBackground(int quarter)
 	{
 		quartersFinished[quarter] = false;
-		if(shutdown.IsCancellationRequested) return;
 		for(int x = (screenWidth/4)*quarter; x <= (screenWidth/4)*(quarter+1); x++)
 		{
 			instance.Raycast(x);
 			for(int y = 0; y < screenHeight; y++)
 			{
-				if(shutdown.IsCancellationRequested) return;
 				if(instance.screenTextures.Count>0)
 				for(int i = instance.screenTextures.Count-1; i >= 0; i --)
 				{
