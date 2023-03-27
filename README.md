@@ -20,6 +20,7 @@ Also features some very jank and unfinished dev tools.
 	* State file (wtt) editor
 * Improve culling & rendering
 * Allow weapon & monster stats to be defined in the wtt
+* Proper 3D Raycasting throughout the map for weapons & line of sight stuff.
 
 # How do I use this?
 
