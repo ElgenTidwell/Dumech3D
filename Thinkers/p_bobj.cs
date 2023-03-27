@@ -31,23 +31,18 @@ namespace Thinkers
 
             rect output;
             Program.instance.CheckWorldCollision(myThing.GetBody(), out output,out hit);
-
-            // myThing.SetPosition(output.pos);
-
-            // myThing.SetVelocity(output.velocity);
-
-            // Program.instance.CheckThingCollision(myThing.GetBody(), out output,out hit2);
-
-            if(hit.ceilingHit) gravity = 0;
-
+            
             myThing.SetPosition(output.pos);
 
             myThing.SetVelocity(output.velocity);
 
-            P_ApplyVelocity(deltaTime);
+            Program.instance.CheckThingCollision(myThing);
 
+            if(hit.ceilingHit) gravity = 0;
             wasOnGround = onGround;
             onGround = hit.onGround;
+
+            P_ApplyVelocity(deltaTime);
         }
         void P_ApplyVelocity(float deltaTime)
         {

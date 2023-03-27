@@ -9,16 +9,11 @@ public class LevelEditor
     Map copy;
     List<Thing> things = new List<Thing>();
 
-    int selectedThing = -1,hoveringThing;
+    int selectedThing = -1,hoveringThing = -1;
     public void Init(Program p)
     {
-        copy = new Map();
-        copy.data   = p.currentMap.data;
-        copy.width  = p.currentMap.width;
-        copy.length = p.currentMap.length;
-        copy.height = p.currentMap.height;
-        things.Clear();
-        things.AddRange(p.currentMap.things);
+        copy = MapLoader.r3m(p.currentMap);
+        things.AddRange(copy.things);
     }
     public void Apply(Program p)
     {
@@ -28,6 +23,88 @@ public class LevelEditor
     public void DrawLevelEditor()
     {
         Vector2 mousepos = Raylib.GetMousePosition();
+        
+        for(int z = 0; z < copy.height; z++)
+        {
+            for(int x = 0; x < copy.width; x++)
+            {
+                for(int y = 0; y < copy.length; y++)
+                {					
+                    Color color;
+                    switch (copy.data[z,x,y])
+                    {
+                        case 1: color = Raylib.RED; break; //red
+                        case 2: color = Raylib.GREEN; break; //green
+                        case 3: color = Raylib.BLUE; break; //blue
+                        case 4: color = Raylib.WHITE; break; //white
+                        default: color = Raylib.YELLOW; break; //yellow
+                    }
+
+                    color.a = (byte)(z == activeLayer?255:100);
+
+                    if(copy.data[z,x,y] != 0)
+                        Raylib.DrawRectangle((int)((x)*zoom+xoff),(int)((y)*zoom+yoff),(int)zoom+1,(int)zoom+1,color);
+
+                    if(mousepos.X < Program.screenWidth-250 || mousepos.Y < 80 || hoveringThing != -1) continue;
+                    
+                    if(x == (int)((mousepos.X-xoff)/zoom) && y == (int)((mousepos.Y-yoff)/zoom) && z == activeLayer)
+                    {
+                        Raylib.DrawRectangle((int)((x)*zoom+xoff),(int)((y)*zoom+yoff),(int)zoom,(int)zoom,new Color(255,255,255,150));
+
+                        if(selectedThing >= 0) continue;
+
+                        if(Raylib.IsMouseButtonDown(MouseButton.MOUSE_BUTTON_LEFT)) copy.data[activeLayer,x,y] = 1;
+                        if(Raylib.IsMouseButtonDown(MouseButton.MOUSE_BUTTON_RIGHT)) copy.data[activeLayer,x,y] = 0;
+                    }
+                }
+            }
+        }
+
+        Raylib.DrawRectangleLinesEx(new Rectangle(xoff,yoff,zoom*copy.width,zoom*copy.length),2,Raylib.WHITE);
+
+        hoveringThing = -1;
+
+        for(int i = 0; i < things.Count; i ++)
+        {
+            Vector2 offsetPos = new Vector2(things[i].GetPosition().X-things[i].GetBody().size.X*2,things[i].GetPosition().Y-things[i].GetBody().size.Y*2);
+            Vector2 rectWidth = new Vector2(things[i].GetBody().size.X*4*zoom,things[i].GetBody().size.Y*4*zoom);
+
+            if(mousepos.X > (offsetPos.X)*zoom+xoff && mousepos.Y > (offsetPos.Y)*zoom+yoff &&
+               mousepos.X < (offsetPos.X)*zoom+xoff+rectWidth.X && mousepos.Y < (offsetPos.Y)*zoom+yoff+rectWidth.Y)
+            {
+                hoveringThing = i;
+            }
+
+            Color col = new Color(0,255,155,255);
+            if(hoveringThing == i) col = new Color(255,150,50,255);
+            
+            Raylib.DrawRectangle((int)((offsetPos.X)*zoom+xoff),(int)((offsetPos.Y)*zoom+yoff),(int)rectWidth.X,(int)rectWidth.Y,col);
+            RayGui.GuiLabel(new Rectangle((int)((offsetPos.X)*zoom+xoff),(int)((offsetPos.Y)*zoom+yoff),100,20),things[i].GetType().ToString());
+        }
+
+        if(Raylib.IsKeyPressed(KeyboardKey.KEY_UP)) activeLayer++;
+        if(Raylib.IsKeyPressed(KeyboardKey.KEY_DOWN)) activeLayer--;
+
+        if(Raylib.IsMouseButtonDown(MouseButton.MOUSE_BUTTON_MIDDLE))
+        {
+			Vector2 mouseDelta = Raylib.GetMouseDelta();
+            xoff+= mouseDelta.X;
+            yoff+= mouseDelta.Y;
+        }
+
+        if(selectedThing >= 0)
+        {
+
+        }
+
+        if(Raylib.GetMouseWheelMove() > 0) zoom *= 1.1f;
+        if(Raylib.GetMouseWheelMove() < 0) zoom *= 0.9f;
+
+        activeLayer = Mths.Clamp(activeLayer,0,copy.height-1);
+
+
+        //UI rendering
+
 
         //map expansion buttons
         {
@@ -69,79 +146,5 @@ public class LevelEditor
         {
 
         }
-        
-        for(int z = 0; z < copy.height; z++)
-        {
-            for(int x = 0; x < copy.width; x++)
-            {
-                for(int y = 0; y < copy.length; y++)
-                {					
-                    Color color;
-                    switch (copy.data[z,x,y])
-                    {
-                        case 1: color = Raylib.RED; break; //red
-                        case 2: color = Raylib.GREEN; break; //green
-                        case 3: color = Raylib.BLUE; break; //blue
-                        case 4: color = Raylib.WHITE; break; //white
-                        default: color = Raylib.YELLOW; break; //yellow
-                    }
-
-                    color.a = (byte)(z == activeLayer?255:100);
-
-                    if(copy.data[z,x,y] != 0)
-                        Raylib.DrawRectangle((int)((x)*zoom+xoff),(int)((y)*zoom+yoff),(int)zoom,(int)zoom,color);
-
-                    if(mousepos.X < Program.screenWidth-250 || mousepos.Y < 80 || hoveringThing != 0) continue;
-                    
-                    if(x == (int)((mousepos.X-xoff)/zoom) && y == (int)((mousepos.Y-yoff)/zoom) && z == activeLayer)
-                    {
-                        Raylib.DrawRectangle((int)((x)*zoom+xoff),(int)((y)*zoom+yoff),(int)zoom,(int)zoom,new Color(255,255,255,150));
-
-                        if(selectedThing >= 0) continue;
-
-                        if(Raylib.IsMouseButtonDown(MouseButton.MOUSE_BUTTON_LEFT)) copy.data[activeLayer,x,y] = 1;
-                        if(Raylib.IsMouseButtonDown(MouseButton.MOUSE_BUTTON_RIGHT)) copy.data[activeLayer,x,y] = 0;
-                    }
-                }
-            }
-        }
-
-        Raylib.DrawRectangleLinesEx(new Rectangle(xoff,yoff,zoom*copy.width,zoom*copy.length),2,Raylib.WHITE);
-
-        hoveringThing = 0;
-
-        for(int i = things.Count-1; i >= 0; i--)
-        {
-            Vector2 offsetPos = new Vector2(things[i].GetPosition().X-things[i].GetBody().size.X,things[i].GetPosition().Y-things[i].GetBody().size.Y);
-            Vector2 rectWidth = new Vector2(things[i].GetBody().size.X*2*zoom,things[i].GetBody().size.Y*2*zoom);
-            
-            Raylib.DrawRectangle((int)((offsetPos.X)*zoom+xoff),(int)((offsetPos.Y)*zoom+yoff),(int)rectWidth.X,(int)rectWidth.Y,new Color(0,255,155,255));
-            RayGui.GuiLabel(new Rectangle((int)((offsetPos.X)*zoom+xoff),(int)((offsetPos.Y)*zoom+yoff),100,20),things[i].GetType().ToString());
-
-            if(mousepos.X < (offsetPos.X)*zoom+xoff && mousepos.Y < (offsetPos.Y)*zoom+yoff &&
-               mousepos.X > (offsetPos.X)*zoom+xoff-rectWidth.X && mousepos.Y > (offsetPos.Y)*zoom+yoff-rectWidth.Y)
-            {
-                hoveringThing = i;
-            }
-        }
-
-        if(Raylib.IsKeyPressed(KeyboardKey.KEY_UP)) activeLayer++;
-        if(Raylib.IsKeyPressed(KeyboardKey.KEY_DOWN)) activeLayer--;
-
-        if(Raylib.IsMouseButtonDown(MouseButton.MOUSE_BUTTON_MIDDLE))
-        {
-			Vector2 mouseDelta = Raylib.GetMouseDelta();
-            xoff+= mouseDelta.X;
-            yoff+= mouseDelta.Y;
-        }
-
-        if(selectedThing >= 0)
-        {
-
-        }
-
-        zoom += Raylib.GetMouseWheelMove();
-
-        activeLayer = Mths.Clamp(activeLayer,0,copy.height-1);
     }
 }

@@ -6,7 +6,7 @@ using Thinkers;
 public class PlayerStart : Thing 
 { 
     public PlayerStart() 
-    { body = new rect{size = new Vector3(0.5f,0.5f,0.28f)}; thinker = new NullThinker(); thinker.myThing=this; id = 1;} 
+    { body = new rect{size = new Vector3(0.15f,0.15f,0.28f)}; thinker = new NullThinker(); thinker.myThing=this; id = 1;} 
 }
 public class Player : Thing     
 {  

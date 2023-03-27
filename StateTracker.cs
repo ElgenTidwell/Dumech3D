@@ -110,7 +110,7 @@ namespace States
 
             int olddir = directionToCamera;
 
-            directionToCamera = (int)(angle/45f);
+            directionToCamera = (int)Mths.Clamp(MathF.Floor((angle+5)/45f),0,7);
             directionToCamera = 7-directionToCamera;
 
             if(directionToCamera != olddir) LoadCurrentSprite(directionToCamera);

@@ -32,7 +32,7 @@ public class Program
 	static float timetotick;
 	static int gametick;
 
-	public Map currentMap;
+	public string currentMap;
 
 	int mapindex = 1;
 
@@ -81,7 +81,7 @@ public class Program
 		mapHeight = map.length;
 		mapLayers = map.height;
 		worldMap  = map.data;
-		currentMap = map;
+		currentMap = path;
 		activeThings = new List<Thing>();
 		activeThings.AddRange(map.things);
 
@@ -303,7 +303,7 @@ public class Program
 			//calculate height of the sprite on screen
 			int spriteHeight = (int)MathF.Abs((int)(screenHeight / (transformY))); //using 'transformY' instead of the real distance prevents fisheye
 
-			float z = 0.5f;
+			float z = t.GetPosition().Z+t.GetSize().Z;
 
 			int drawStartY = -spriteHeight/2 + screenHeight/2 + (int)((cameraOffset + devZ - z) * 2 * spriteHeight / 2 + updown);
 			if(drawStartY < 0) drawStartY = 0;
@@ -407,10 +407,36 @@ public class Program
 	{
 		hitInfo hit = new hitInfo();
 
-		hit.hit = (r1.pos.X - r1.size.X < r2.pos.X + r2.size.X && r1.pos.X + r1.size.X > r2.pos.X - r2.size.X
-		&& r1.pos.Y - r1.size.Y < r2.pos.Y + r2.size.Y && r1.pos.Y + r1.size.Y > r2.pos.Y - r2.size.Y
-		&& r1.pos.Z - r1.size.Z < r2.pos.Z + r2.size.Z && r1.pos.Z + r1.size.Z > r2.pos.Z - r2.size.Z);
+		Vector3 minimum1 = (r1.pos-r1.size*2);
+		Vector3 maximum1 = (r1.pos+r1.size*2);
+		Vector3 minimum2 = (r2.pos-r2.size*2);
+		Vector3 maximum2 = (r2.pos+r2.size*2);
 
+		hit.hit = 
+		(
+			minimum1.X <= maximum2.X &&
+			maximum1.X >= minimum2.X &&
+			minimum1.Y <= maximum2.Y &&
+			maximum1.Y >= minimum2.Y &&
+			minimum1.Z <= maximum2.Z &&
+			maximum1.Z >= minimum2.Z
+		);
+
+		if(hit.hit)
+		{	
+			float distx = (r1.pos.X-r2.pos.X);
+			float disty = (r1.pos.Y-r2.pos.Y);
+			float distz = (r1.pos.Z-r2.pos.Z);
+			hit.overlapX = (distx)-(r1.size.X-r2.size.X)*MathF.Sign(distx);
+			hit.overlapY = (disty)-(r1.size.Y-r2.size.Y)*MathF.Sign(disty);
+			hit.overlapZ = (distz)-(r1.size.Z-r2.size.Z)*MathF.Sign(distz);
+		}
+		else
+		{
+			hit.overlapX = 0;
+			hit.overlapY = 0;
+			hit.overlapZ = 0;
+		}
 		return hit;
 	}
 
@@ -543,36 +569,37 @@ public class Program
 			}
 		}
 	}
-	public void CheckThingCollision(rect rect, out rect nr, out hitInfo hitInf)
+	public void CheckThingCollision(Thing self)
 	{
-		Vector3 minimum = (rect.pos-rect.size*2);
-		Vector3 maximum = (rect.pos+rect.size*2);
-
-		nr = rect;
-		hitInf = new hitInfo();
-		foreach(Thing thing in BlockmapManager.GetBlockContentsFromMapPoint((int)rect.pos.X,(int)rect.pos.Y))
+		rect rect = self.GetBody();
+		rect nr = rect;
+		foreach(Thing thing in BlockmapManager.GetBlockContentsFromMapPoint((int)self.GetPosition().X,(int)self.GetPosition().Y))
 		{
+			rect nr2 = thing.GetBody();
 			hitInfo info = RectVsRect(new rect{pos = rect.pos,size=rect.size,velocity=new Vector3(rect.velocity.X,0,0)},thing.GetBody());
-
-			if(info.hit)
+			if(thing != self)
 			{
-				{nr.pos.X += (info.overlapX*nr.velocity.X+(info.overlapX*0.1f)); nr.velocity.X = 0;}
+				if(info.hit)
+				{
+					{nr.pos.X += (info.overlapX)*MathF.Abs(nr.velocity.X); nr.velocity.X = 0;}
+				}
+
+				info = RectVsRect(new rect{pos = rect.pos,size=rect.size,velocity=new Vector3(0,rect.velocity.Y,0)},thing.GetBody());
+
+				if(info.hit)
+				{
+					{nr.pos.Y += (info.overlapY)*MathF.Abs(nr.velocity.Y); nr.velocity.Y = 0;}
+				}
+
+				info = RectVsRect(new rect{pos = rect.pos,size=rect.size+new Vector3(0,0,0.1f),velocity=new Vector3(0,0,rect.velocity.Z)},thing.GetBody());
+
+				if(info.hit)
+				{
+					{nr.pos.Z += (info.overlapZ)*MathF.Abs(nr.velocity.Z); nr.velocity.Z = 0;}
+				}
+
+				self.SetBody(nr);
 			}
-
-			info = RectVsRect(new rect{pos = rect.pos,size=rect.size,velocity=new Vector3(0,rect.velocity.Y,0)},thing.GetBody());
-
-			if(info.hit)
-			{
-				{nr.pos.Y += (info.overlapY*nr.velocity.Y+(info.overlapY*0.1f)); nr.velocity.Y = 0;}
-			}
-
-			info = RectVsRect(new rect{pos = rect.pos,size=rect.size+new Vector3(0,0,0.1f),velocity=new Vector3(0,0,rect.velocity.Z)},thing.GetBody());
-
-			if(info.hit)
-			{
-				{nr.velocity.Z = 0;}
-			}
-			hitInf = info;
 		}
 	}
 	public static float MoveTowards(float current, float target, float maxDelta)

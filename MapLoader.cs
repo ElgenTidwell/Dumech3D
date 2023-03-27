@@ -22,6 +22,7 @@ public static class MapLoader
         foreach(string line in data)
         {
             if(string.IsNullOrWhiteSpace(line)) continue;
+            if(line.StartsWith('#')) continue;
             if(line == "MPS") { mode = 0; lineIndex = 0; continue; }
             if(line == "THD") { mode = 1; lineIndex = 0; continue; }
             switch(mode)
