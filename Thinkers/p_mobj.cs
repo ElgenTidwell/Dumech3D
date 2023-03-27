@@ -44,10 +44,10 @@ namespace Thinkers
         {
             myThing.SetVelocity(new Vector3(0,0,myThing.GetVelocity().Z));
             Vector3 moveDir = new Vector3(myThing.GetHeading().X,myThing.GetHeading().Y,0)*walkspeed*dt;
+            rect test = new rect{pos = myThing.GetPosition()+moveDir, size = myThing.GetSize()};
+            Program.instance.CheckWorldCollision(test,out rect nr, out hitInfo hit);
 
-            Program.instance.CheckWorldCollision(new rect{pos = myThing.GetPosition()+moveDir, size = myThing.GetSize()},out rect nr, out hitInfo hit);
-
-            if(hit.hit)
+            if(hit.hit || Program.instance.CheckThingCollision(test,myThing))
             {
                 int turnDir = (successfulWalk?((int)MathF.Sign(pRandom.GetRandom()/127+0.01f))*45:lastTurn);
                 lastTurn = turnDir;

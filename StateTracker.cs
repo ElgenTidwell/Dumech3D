@@ -102,7 +102,8 @@ namespace States
             if(tick >= 250) tick = 1;
             if(tick>states[currentState].ticks)
             {
-                onSpriteChanged.Invoke();
+                if(onSpriteChanged != null)
+                    onSpriteChanged.Invoke();
                 LoadCurrentSprite(directionToCamera);
                 currentState = states[currentState].nextState;
                 tick = 1;

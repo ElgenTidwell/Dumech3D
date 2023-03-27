@@ -45,7 +45,7 @@ public class Program
 	public PlayState state;
 
 
-	public const float camOffBase = 0.3f;
+	public const float camOffBase = 0.4f;
 	float cameraOffset = camOffBase;
 	float dirX=-1, dirY=0;
 	float planeX=0,	planeY=0.66f;//the 2d raycaster version of camera plane
@@ -608,6 +608,20 @@ public class Program
 				self.SetBody(nr);
 			}
 		}
+	}
+	public bool CheckThingCollision(rect rect,Thing caller)
+	{
+		rect nr = rect;
+		foreach(Thing thing in BlockmapManager.GetBlockContentsFromMapPoint((int)rect.pos.X,(int)rect.pos.Y))
+		{
+			rect nr2 = thing.GetBody();
+			hitInfo info = RectVsRect(rect,thing.GetBody());
+			if(thing != caller)
+			{
+				if(info.hit) return true;
+			}
+		}
+		return false;
 	}
 	public static float MoveTowards(float current, float target, float maxDelta)
 	{
