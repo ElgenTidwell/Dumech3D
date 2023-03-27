@@ -126,19 +126,21 @@ public class LevelEditor
 
         if(Raylib.GetMouseWheelMove() > 0)
         {
-            float deltaZoom = zoom*1.125f;
-            xoff += (Raylib.GetMousePosition().X/deltaZoom-Raylib.GetMousePosition().X/zoom)*zoom;
-            yoff += (Raylib.GetMousePosition().Y/deltaZoom-Raylib.GetMousePosition().Y/zoom)*zoom;
-            zoom = deltaZoom;
+            float deltaZoom = 1.125f;
+
+            zoom *= deltaZoom;
+
+            xoff = deltaZoom*xoff-Program.screenWidth/Program.screenScalar;
+            yoff = deltaZoom*yoff-Program.screenHeight/Program.screenScalar;
         }
         if(Raylib.GetMouseWheelMove() < 0)
         {
-            float deltaZoom = zoom*0.875f;
+            float deltaZoom = 0.875f;
 
-            xoff += (Raylib.GetMousePosition().X/deltaZoom-Raylib.GetMousePosition().X/zoom)*zoom;
-            yoff += (Raylib.GetMousePosition().Y/deltaZoom-Raylib.GetMousePosition().Y/zoom)*zoom;
+            zoom *= deltaZoom;
 
-            zoom = deltaZoom;
+            xoff = deltaZoom*xoff+Program.screenWidth/Program.screenScalar;
+            yoff = deltaZoom*yoff+Program.screenHeight/Program.screenScalar;
         }
 
         activeLayer = Mths.Clamp(activeLayer,0,copy.height-1);
