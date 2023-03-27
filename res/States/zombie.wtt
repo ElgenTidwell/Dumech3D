@@ -9,8 +9,8 @@ DEF targetthreshold 80
 DEF meledamage 10
 
 #   state name - sprite base - direction - offset - action - next state - ticks
-ZOMB_STAND01 /Zombie/zomb t 1 MONSTER_IDL ZOMB_STAND02 8
-ZOMB_STAND02 /Zombie/zomb t 2 MONSTER_IDL ZOMB_STAND01 8
+ZOMB_STAND01 /Zombie/zomb t 1 MONSTER_IDL ZOMB_STAND02 4
+ZOMB_STAND02 /Zombie/zomb t 2 MONSTER_IDL ZOMB_STAND01 4
 ZOMB_WALK01 /Zombie/zomb t 1 MONSTER_CHS ZOMB_WALK02 2
 ZOMB_WALK02 /Zombie/zomb t 2 MONSTER_CHS ZOMB_WALK03 2
 ZOMB_WALK03 /Zombie/zomb t 3 MONSTER_CHS ZOMB_WALK04 2

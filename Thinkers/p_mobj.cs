@@ -98,11 +98,20 @@ namespace Thinkers
 
             P_RecalculateDir();
         }
+        void P_Idle()
+        {
+            Player p = (Player)Program.instance.activeThings[0];
+            if((p.GetPosition()-myThing.GetPosition()).LengthSquared() < 3)
+            {
+                tracker.MoveToPreDefAction("WALK");
+            }
+        }
         void P_SprChange()
         {
             switch(tracker.GetCurrentStateAction())
             {
                 case State.MONSTER_IDLE:
+                P_Idle();
                 break;
                 case State.MONSTER_CHASE:
                 P_TryWalk();

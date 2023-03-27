@@ -171,12 +171,6 @@ public class Program
 
 			switch(instance.state)
 			{
-				case PlayState.game:
-
-					RunGame(l, sequencer);
-
-				break;
-				
 				case PlayState.leveleditor:
 				{
 					if(Raylib.IsKeyPressed(KeyboardKey.KEY_PERIOD))						
@@ -195,6 +189,12 @@ public class Program
 
 					Raylib.EndDrawing();
 				}
+				break;
+
+				case PlayState.game:
+
+					RunGame(l, sequencer);
+
 				break;
 			}
 			if (Raylib.IsAudioStreamProcessed(stream))
@@ -217,7 +217,7 @@ public class Program
 
 	static void RunGame(LevelEditor l, MidiFileSequencer s)
 	{
-		if(Raylib.IsKeyReleased(KeyboardKey.KEY_PERIOD))
+		if(Raylib.IsKeyReleased(KeyboardKey.KEY_PERIOD) && instance.sw.ElapsedMilliseconds > 150)
 		{
 			instance.state = PlayState.leveleditor;
 			Raylib.EnableCursor();
