@@ -6,6 +6,7 @@ public class LevelEditor
 {
     int activeLayer = 0;
     float zoom = 6f, xoff = 0,yoff = 0;
+    float totalTime;
     Map copy;
     List<Thing> things = new List<Thing>();
 
@@ -23,6 +24,7 @@ public class LevelEditor
     }
     public void DrawLevelEditor()
     {
+        totalTime += 1;
         Vector2 mousepos = Raylib.GetMousePosition();
         
         for(int z = 0; z < copy.height; z++)
@@ -78,6 +80,7 @@ public class LevelEditor
 
             Color col = new Color(0,255,155,255);
             if(hoveringThing == i) col = new Color(255,150,50,255);
+            if(selectedThing == i) col = new Color(100+(int)MathF.Abs(MathF.Sin(totalTime/10)*155),0,0,255);
             
             Raylib.DrawRectangle((int)((offsetPos.X)*zoom+xoff),(int)((offsetPos.Y)*zoom+yoff),(int)rectWidth.X,(int)rectWidth.Y,col);
             RayGui.GuiLabel(new Rectangle((int)((offsetPos.X)*zoom+xoff),(int)((offsetPos.Y)*zoom+yoff),100,20),things[i].GetType().ToString());
@@ -93,9 +96,21 @@ public class LevelEditor
             yoff+= mouseDelta.Y;
         }
 
+        if(hoveringThing >= 0 && Raylib.IsMouseButtonPressed(MouseButton.MOUSE_BUTTON_LEFT)) selectedThing = hoveringThing; 
+
         if(selectedThing >= 0)
         {
+            if(Raylib.IsMouseButtonDown(MouseButton.MOUSE_BUTTON_RIGHT))
+            {
+                Vector2 mouse = Raylib.GetMousePosition();
+                float x = (mouse.X-xoff)/zoom;
+                float y = (mouse.Y-yoff)/zoom;
 
+                float _x = ((int)(x*10f))/10f;
+                float _y = ((int)(y*10f))/10f;
+
+                things[selectedThing].SetPosition(new Vector3(_x,_y,things[selectedThing].GetPosition().Z));
+            }
         }
 
         if(Raylib.GetMouseWheelMove() > 0) zoom *= 1.1f;

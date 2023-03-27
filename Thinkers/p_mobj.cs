@@ -21,9 +21,9 @@ namespace Thinkers
         {
             string fullpath = $"{Program.basePath}/States/{statePath}.wtt";
             tracker = new StateTracker(fullpath,true,true);
-            tracker.tick = (int)((pRandom.GetRandom()/255f)*32);
+            tracker.tick = (short)(pRandom.GetRandom()%3);
+            Console.WriteLine(tracker.tick);
             tracker.onSpriteChanged += P_SprChange;
-            tracker.MoveToPreDefAction("WALK");
         }
         public override void T_Destroy()
         {
@@ -40,14 +40,21 @@ namespace Thinkers
             base.T_Think(deltaTime);
         }
 
-        void P_TryWalk(float dt)
+        bool P_Move()
         {
-            myThing.SetVelocity(new Vector3(0,0,myThing.GetVelocity().Z));
-            Vector3 moveDir = new Vector3(myThing.GetHeading().X,myThing.GetHeading().Y,0)*walkspeed*dt;
+            Vector3 moveDir = new Vector3(myThing.GetHeading().X,myThing.GetHeading().Y,0)*walkspeed*deltaTime;
             rect test = new rect{pos = myThing.GetPosition()+moveDir, size = myThing.GetSize()};
             Program.instance.CheckWorldCollision(test,out rect nr, out hitInfo hit);
 
-            if(hit.hit || Program.instance.CheckThingCollision(test,myThing))
+            return !(hit.hit || Program.instance.CheckThingCollision(test,myThing));
+        }
+
+        void P_TryWalk()
+        {
+            myThing.SetVelocity(new Vector3(0,0,myThing.GetVelocity().Z));
+            Vector3 moveDir = new Vector3(myThing.GetHeading().X,myThing.GetHeading().Y,0)*walkspeed*deltaTime;
+
+            if(!P_Move())
             {
                 int turnDir = (successfulWalk?((int)MathF.Sign(pRandom.GetRandom()/127+0.01f))*45:lastTurn);
                 lastTurn = turnDir;
@@ -61,17 +68,16 @@ namespace Thinkers
 
             if(movecount <= 0)
             {
-                P_NewChaseDir(dt);
+                P_NewChaseDir();
             }
 
             successfulWalk = true;
 
             myThing.SetVelocity(moveDir+Vector3.UnitZ*myThing.GetVelocity().Z);
         }
-        void P_NewChaseDir(float dt)
+        void P_NewChaseDir()
         {
             movecount = pRandom.GetRandom()&25;
-            Console.WriteLine(movecount);
 
             Vector3 targetPos = Program.instance.activeThings[target].GetPosition();
 
@@ -81,7 +87,15 @@ namespace Thinkers
 
             angle = ((int)(angle/45))*45;
 
+            float oldDir = myThing.angularDirection;
+
             myThing.angularDirection = angle;
+
+            if(!P_Move())
+            {
+                myThing.angularDirection = oldDir;
+            }
+
             P_RecalculateDir();
         }
         void P_SprChange()
@@ -91,7 +105,7 @@ namespace Thinkers
                 case State.MONSTER_IDLE:
                 break;
                 case State.MONSTER_CHASE:
-                P_TryWalk(deltaTime);
+                P_TryWalk();
                 break;
                 case State.MONSTER_ATTACK:
                 break;

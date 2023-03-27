@@ -56,11 +56,11 @@ public class Program
 
 	Stopwatch sw = new Stopwatch();
 
-	double lastFrameTime, currentFrameTime;
+	public double lastFrameTime, currentFrameTime;
 
-	float[,] zbuffer = new float[screenWidth,screenHeight];
+	float[,] zbuffer = new float[screenWidth,screenHeight], zFrontBuffer = new float[screenWidth,screenHeight];
 
-	Color[,] pixels = new Color[screenWidth,screenHeight];
+	Color[,] pixels = new Color[screenWidth,screenHeight], pixelFrontBuffer = new Color[screenWidth,screenHeight];
 	public static int screenScalar = 4;
 
 	float deltaTime;
@@ -73,6 +73,12 @@ public class Program
 
 	public List<Tuple<Vector3,Tex>> screenTextures = new List<Tuple<Vector3, Tex>>();
 	static int waiting = 0;
+
+	static Task[] screenpool;
+	static Object screenLock;
+	static bool[] quartersFinished;
+	static CancellationToken shutdown;
+	static CancellationTokenSource shutdownSource;
 
 	public void LoadMap(string path)
 	{
@@ -102,6 +108,13 @@ public class Program
 
 	static unsafe void Main(string[] args)
 	{
+		screenLock = new Object();
+		screenpool = new Task[4];
+		quartersFinished = new bool[4];
+
+		shutdownSource = new CancellationTokenSource();
+		shutdown = shutdownSource.Token;
+
 		Raylib.SetConfigFlags(ConfigFlags.FLAG_WINDOW_UNDECORATED);
 		Raylib.InitWindow(screenWidth* screenScalar, screenHeight* screenScalar, "layers!");
 
@@ -190,6 +203,14 @@ public class Program
 		}
 
 		instance.sw.Stop();
+
+		foreach(Thing thing in instance.activeThings)
+		{
+			thing.Destroy();
+		}
+		shutdownSource.Cancel();
+		shutdownSource.Dispose();
+
 		Raylib.StopAudioStream(stream);
 		Raylib.EnableCursor();
 		RayGui.GuiDisable();
@@ -228,12 +249,44 @@ public class Program
 
 		instance.SpriteRender();
 
+		/*{ experimental threading, kinda sucks
+			screenpool[0] = Task.Run(()=>DrawBackground(0),shutdown);
+			screenpool[1] = Task.Run(()=>DrawBackground(1),shutdown);
+			screenpool[2] = Task.Run(()=>DrawBackground(2),shutdown);
+			screenpool[3] = Task.Run(()=>DrawBackground(3),shutdown);
+			Thread.Sleep(5);
+
+			bool canSwap = false;
+			while(!canSwap)
+			{
+				for(int i = 0; i < 4; i ++)
+				{
+					if(!quartersFinished[i])
+					{
+						canSwap = false;
+						return;
+					}
+					canSwap = true;
+				}
+			}
+			if(canSwap)
+			{
+				Array.Copy(instance.pixels,instance.pixelFrontBuffer,screenWidth*screenHeight);
+				Array.Copy(instance.zbuffer,instance.zFrontBuffer,screenWidth*screenHeight);
+			}
+		}*/
+
 		for (int x = 0; x < screenWidth; x+=2)
 		{
+			// for (int y = 0; y < screenHeight; y++)
+			// {
+			// 	Raylib.DrawRectangle(x*screenScalar,y*screenScalar,screenScalar,screenScalar,instance.pixels[x,y]);
+			// 	instance.zbuffer[x,y] = 1000;
+			// }
 			instance.Raycast(x);
-			
 			for(int y = 0; y < screenHeight; y++)
 			{
+				if(shutdown.IsCancellationRequested) return;
 				if(instance.screenTextures.Count>0)
 				for(int i = instance.screenTextures.Count-1; i >= 0; i --)
 				{
@@ -261,12 +314,12 @@ public class Program
 					}
 				}
 				Raylib.DrawRectangle(x*screenScalar,y*screenScalar,screenScalar*2,screenScalar,instance.pixels[x,y]);
-				instance.zbuffer[x,y] = 1000;				
+				instance.zbuffer[x,y] = 1000;
+				instance.zFrontBuffer[x,y] = 1000;
 				instance.pixels[x,y] = Raylib.DARKGRAY;
 			}
 		}
 
-		
 		foreach(Thing thing in BlockmapManager.GetBlockContentsFromMapPoint((int)instance.activeThings[0].GetPosition().X,(int)instance.activeThings[0].GetPosition().Y))
 		{
 			Raylib.DrawRectangle((int)(thing.GetPosition().X*15),(int)(thing.GetPosition().Y*15),15,15,Raylib.RED);
@@ -282,6 +335,49 @@ public class Program
 		Raylib.DrawFPS(100,100);
 		Raylib.EndDrawing();
 	}
+
+	static void DrawBackground(int quarter)
+	{
+		quartersFinished[quarter] = false;
+		if(shutdown.IsCancellationRequested) return;
+		for(int x = (screenWidth/4)*quarter; x <= (screenWidth/4)*(quarter+1); x++)
+		{
+			instance.Raycast(x);
+			for(int y = 0; y < screenHeight; y++)
+			{
+				if(shutdown.IsCancellationRequested) return;
+				if(instance.screenTextures.Count>0)
+				for(int i = instance.screenTextures.Count-1; i >= 0; i --)
+				{
+					var tex = instance.screenTextures[i];
+
+					if(x > tex.Item1.X && y > tex.Item1.Y && x < tex.Item2.width+tex.Item1.X && y < tex.Item2.height+tex.Item1.Y)
+					{
+						int xpos = (int)((x-tex.Item1.X));
+						int ypos = (int)((y-tex.Item1.Y));
+
+						if(xpos >= tex.Item2.width || ypos >= tex.Item2.height || x < 0 || y < 0) continue;
+
+						Color col = tex.Item2.colors[(int)(xpos),(int)(ypos)];
+
+						if(col.a < 150) continue;
+
+						col.a = 255;
+
+						xpos = (int)((x*tex.Item1.Z));
+						ypos = (int)((y*tex.Item1.Z));
+
+						if(xpos >= screenWidth || ypos >= screenHeight || x < 0 || y < 0) continue;
+
+						instance.pixels[xpos,ypos] = col;
+					}
+				}
+			}
+		}
+		Thread.Sleep(10);
+		quartersFinished[quarter] = true;
+	}
+
 
 	private void SpriteRender()
 	{
@@ -346,7 +442,7 @@ public class Program
 
 					if(_x < 0 || _x >= screenWidth) continue;
 
-					if(zbuffer[_x,y] < transformY) continue;
+					if(zbuffer[_x,y] < transformY || zFrontBuffer[_x,y] < transformY) continue;
 
 					float d = (y) * 1 - screenHeight * 0.5f - (int)((cameraOffset + devZ - z) * 2 * spriteHeight / 2 + updown) + spriteHeight*0.5f; //256 and 128 factors to avoid floats
 
@@ -359,7 +455,7 @@ public class Program
 
 					float addZ = MathF.Abs((t.GetPosition().Z)-cameraOffset)*2;
 
-					zbuffer[_x,y] = transformY+addZ;
+					zFrontBuffer[_x,y] = transformY+addZ;
 					pixels[_x,y] = col;
 				}
 			}
@@ -863,7 +959,7 @@ public class Program
 
 					int _x = (int)(((float)x * deviser + (float)screenWidth * (1f - deviser) / 2f));
 
-					if (_x < 0 || _x >= screenWidth || (wall && (zbuffer[_x, y] < dist)))
+					if (_x < 0 || _x >= screenWidth || (wall && (zbuffer[_x, y] < dist || zFrontBuffer[_x, y] < dist)))
 					{
 						texPos += step;
 						return;
@@ -923,12 +1019,13 @@ public class Program
 						int tx = (int)(texWidth*2 * (floorX - cellX)) & (texWidth - 1);
 						int ty = (int)(texWidth*2 * (floorY - cellY)) & (texWidth - 1);
 						
-						tx = Mths.Clamp(tx,0,texWidth);
-						ty = Mths.Clamp(ty,0,texWidth);
+						tx = Mths.Clamp(tx,0,texWidth-1);
+						ty = Mths.Clamp(ty,0,texWidth-1);
+						texNum = Mths.Clamp(texNum,0,textures.Length-1);
 
 						color = textures[texNum].colors[tx,ty];
 					}
-					if(zbuffer[_x, y] < dist) return;
+					if(zbuffer[_x, y] < dist || zFrontBuffer[_x, y] < dist) return;
 
 					if (y < 0) return;
 					if (y >= screenHeight) return;
@@ -1011,13 +1108,6 @@ public class Program
 				//draw the pixels of the stripe as a vertical line
 				for (int y = 0; y < screenHeight-1; y++)
 				{
-
-					// if(y > screenHeight/2+updown)
-					// {
-					// 	texNum = 0;
-					// 	DrawFloor(y,0,((screenHeight-(y-updown)))/((float)screenHeight/2f));
-					// }
-
 					if(y >= drawEnd && y <= drawStart && wasHit == 0)
 					{
 						texNum = maintex-1;

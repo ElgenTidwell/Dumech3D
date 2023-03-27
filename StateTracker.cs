@@ -3,7 +3,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
 using System.Linq;
-
+public static class Def
+{
+    public const string walkspeed = "walkspeed";
+    public const string painchance = "painchance";
+    public const string targetthreshold = "targetthreshold";
+    public const string meledamage = "meledamage";
+    public const string damage = "damage";
+}
 namespace States
 {
     public class StateTracker
@@ -12,14 +19,15 @@ namespace States
 
         Dictionary<string,State> states;
         Dictionary<string,string> actionStates;
+        Dictionary<string,short> definitions;
         Tex currentSprite;
         bool isDirectional;
 
         string myHash;
 
         string currentState;
-        public int tick = 0;
-        public int directionToCamera = -1;
+        public short tick = 0;
+        public sbyte directionToCamera = -1;
         public Action onSpriteChanged;
 
         public StateTracker(string path, bool isDirectional, bool loadAllTextures = false)
@@ -28,6 +36,7 @@ namespace States
             myHash = path;
             Dictionary<string,State> _states = new Dictionary<string,State>();
             actionStates = new Dictionary<string, string>();
+            definitions = new Dictionary<string, short>();
             foreach(string line in File.ReadAllLines(path))
             {
                 if(string.IsNullOrWhiteSpace(line)) continue;
@@ -44,8 +53,20 @@ namespace States
                         if(index == 1) act = part.Trim();
                         if(index == 2) st = part.Trim();
                     }
-                    Console.WriteLine($"{act}, {st}");
                     actionStates.Add(act,st);
+                }
+                else if(line.StartsWith("DEF"))
+                {
+                    string targ="";
+                    short val = 0;
+                    foreach(string part in line.Split(' '))
+                    {
+                        if(part == "DEF") continue;
+                        index++;
+                        if(index == 1) targ = part.Trim();
+                        if(index == 2) val = short.Parse(part.Trim());
+                    }
+                    definitions.Add(targ,val);
                 }
                 else
                 {
@@ -95,7 +116,7 @@ namespace States
     
         public void Advance()
         {
-            directionToCamera = Mths.Clamp(directionToCamera,0,8);
+            directionToCamera = Mths.Clamp(directionToCamera,(sbyte)0,(sbyte)8);
             tick++;
 
             //something has gone wrong, or we're looping.
@@ -131,14 +152,14 @@ namespace States
 
             float cos = Vector2.Dot(cameraFacing,selfFacing);
             float angle = Mths.R2D * (MathF.Atan2(selfFacing.X,selfFacing.Y)-MathF.Atan2(cameraFacing.X,cameraFacing.Y));
-            angle += 90;
+            angle += 115;
             if(angle > 90) angle = 450 - angle;
             else           angle = 90  - angle;
 
             int olddir = directionToCamera;
 
-            directionToCamera = (int)Mths.Clamp(MathF.Floor(angle/45f),0,7);
-            directionToCamera = 7-directionToCamera;
+            directionToCamera = (sbyte)Mths.Clamp(MathF.Floor(angle/45f),0,7);
+            directionToCamera = (sbyte)(7-directionToCamera);
 
             if(directionToCamera != olddir) LoadCurrentSprite(directionToCamera);
         }

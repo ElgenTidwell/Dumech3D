@@ -76,8 +76,7 @@ namespace Thinkers
 
             p.updown += myrotSpeed * 40 * (Program.screenWidth/Program.screenHeight);
 
-            if (p.updown > 90) p.updown = 90;
-            if (p.updown < -90) p.updown = -90;
+            p.updown = Mths.Clamp(p.updown,-210,210);
 
             oldMousePos = newMousePos;
         }
