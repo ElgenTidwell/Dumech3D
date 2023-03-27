@@ -13,6 +13,7 @@ public class LevelEditor
     public void Init(Program p)
     {
         copy = MapLoader.r3m(p.currentMap);
+        things.Clear();
         things.AddRange(copy.things);
     }
     public void Apply(Program p)

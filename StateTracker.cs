@@ -11,67 +11,85 @@ namespace States
         static Dictionary<string,Dictionary<string,Tex>> allTextures = new Dictionary<string, Dictionary<string, Tex>>(); 
 
         Dictionary<string,State> states;
+        Dictionary<string,string> actionStates;
         Tex currentSprite;
         bool isDirectional;
 
         string myHash;
 
         string currentState;
-        int tick = 0;
+        public int tick = 0;
         public int directionToCamera = -1;
 
         public StateTracker(string path, bool isDirectional, bool loadAllTextures = false)
         {
+            this.isDirectional = isDirectional;
             myHash = path;
             Dictionary<string,State> _states = new Dictionary<string,State>();
+            actionStates = new Dictionary<string, string>();
             foreach(string line in File.ReadAllLines(path))
             {
                 if(string.IsNullOrWhiteSpace(line)) continue;
                 if(line.StartsWith("#")) continue;
                 State state = new State();
                 int index = 0;
-                foreach(string part in line.Split(' '))
+                if(line.StartsWith("ACT"))
                 {
-                    index++;
-                    //TODO: load state
-                    switch(index)
+                    string st="", act="";
+                    foreach(string part in line.Split(' '))
                     {
-                        case 1:
-                        state.stateName = part;
-                        if(currentState == null) currentState = part;
-                        break;
-                        case 2:
-                        state.baseSpriteName = part;
-                        break;
-                        case 3:
-                        state.directional = part == "t"?true:false;
-                        break;
-                        case 4:
-                        state.offset = int.Parse(part);
-                        break;
-                        case 5:
-                        state.stateAction = part;
-                        break;
-                        case 6:
-                        state.nextState = part;
-                        break;
-                        case 7:
-                        state.ticks = int.Parse(part);
-                        break;
+                        if(part == "ACT") continue;
+                        index++;
+                        if(index == 1) act = part.Trim();
+                        if(index == 2) st = part.Trim();
                     }
+                    Console.WriteLine($"{act}, {st}");
+                    actionStates.Add(act,st);
                 }
-                if(loadAllTextures)
+                else
                 {
-                    if(!allTextures.ContainsKey(myHash)) allTextures.Add(myHash,new Dictionary<string, Tex>());
-                    if(!isDirectional && !allTextures[myHash].ContainsKey(state.stateName+"0"))
-                        allTextures[myHash].Add(state.stateName+"0", GetSpriteAtIndex(state,0));
-                    else
-                        for(int i = 0; i < 8; i ++) if(!allTextures[myHash].ContainsKey(state.stateName+i))allTextures[myHash].Add(state.stateName+i, GetSpriteAtIndex(state,i));
+                    foreach(string part in line.Split(' '))
+                    {
+                        index++;
+                        //TODO: load state
+                        switch(index)
+                        {
+                            case 1:
+                            state.stateName = part;
+                            if(currentState == null) currentState = part;
+                            break;
+                            case 2:
+                            state.baseSpriteName = part;
+                            break;
+                            case 3:
+                            state.directional = part == "t"?true:false;
+                            break;
+                            case 4:
+                            state.offset = int.Parse(part);
+                            break;
+                            case 5:
+                            state.stateAction = part;
+                            break;
+                            case 6:
+                            state.nextState = part;
+                            break;
+                            case 7:
+                            state.ticks = int.Parse(part);
+                            break;
+                        }
+                    }
+                    if(loadAllTextures)
+                    {
+                        if(!allTextures.ContainsKey(myHash)) allTextures.Add(myHash,new Dictionary<string, Tex>());
+                        if(!isDirectional && !allTextures[myHash].ContainsKey(state.stateName+"0"))
+                            allTextures[myHash].Add(state.stateName+"0", GetSpriteAtIndex(state,0));
+                        else
+                            for(int i = 0; i < 8; i ++) if(!allTextures[myHash].ContainsKey(state.stateName+i))allTextures[myHash].Add(state.stateName+i, GetSpriteAtIndex(state,i));
+                    }
+                    _states.Add(state.stateName,state);
                 }
-                _states.Add(state.stateName,state);
             }
             states = _states;
-            this.isDirectional = isDirectional;
         }
     
         public void Advance()
@@ -93,6 +111,11 @@ namespace States
         {
             currentState = stateName;
         }
+        public void MoveToPreDefAction(string action)
+        {
+            if(!actionStates.ContainsKey(action)) return;
+            currentState = actionStates[action];
+        }
         public string FindStateByAction(string action)
         {
             return Array.Find(states.Keys.ToArray(),e=>states[e].stateAction == action);
@@ -105,12 +128,13 @@ namespace States
 
             float cos = Vector2.Dot(cameraFacing,selfFacing);
             float angle = Mths.R2D * (MathF.Atan2(selfFacing.X,selfFacing.Y)-MathF.Atan2(cameraFacing.X,cameraFacing.Y));
+            angle += 90;
             if(angle > 90) angle = 450 - angle;
             else           angle = 90  - angle;
 
             int olddir = directionToCamera;
 
-            directionToCamera = (int)Mths.Clamp(MathF.Floor((angle+5)/45f),0,7);
+            directionToCamera = (int)Mths.Clamp(MathF.Floor(angle/45f),0,7);
             directionToCamera = 7-directionToCamera;
 
             if(directionToCamera != olddir) LoadCurrentSprite(directionToCamera);
@@ -141,11 +165,14 @@ namespace States
 
         private Tex GetSpriteAtIndex(string i, int direction)
         {
-            return Tex.FromBitmap($"{Program.basePath}/Sprites/{states[i].baseSpriteName}{(states[i].directional?direction:0)}{states[i].offset.ToString("000")}.png");
+            int spr = ((states[i].offset + ((states[i].offset-1)*(isDirectional?7:0)))+direction);
+            return Tex.FromBitmap($"{Program.basePath}/Sprites/{states[i].baseSpriteName}{spr.ToString("0000")}.png");
         }
         Tex GetSpriteAtIndex(State state, int direction)
         {
-            return Tex.FromBitmap($"{Program.basePath}/Sprites/{state.baseSpriteName}{(state.directional?direction:0)}{state.offset.ToString("000")}.png");
+            int spr = ((state.offset + ((state.offset-1)*(isDirectional?7:0)))+direction);
+
+            return Tex.FromBitmap($"{Program.basePath}/Sprites/{state.baseSpriteName}{spr.ToString("0000")}.png");
         }
     }
 
@@ -154,6 +181,10 @@ namespace States
         public const string WEAPON_READY = "WEAPON_RDY";
         public const string WEAPON_PREFIRE = "WEAPON_PFR";
         public const string WEAPON_SHOOT = "WEAPON_FRE";
+        public const string MONSTER_IDLE = "MONSTER_IDL";
+        public const string MONSTER_CHASE = "MONSTER_CHS";
+        public const string MONSTER_ATTACK = "MONSTER_ATT";
+        public const string MONSTER_NULL = "MONSTER_NLL";
         public string stateName;
         public string baseSpriteName;
         public bool directional;

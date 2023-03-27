@@ -13,7 +13,7 @@ public static class BlockmapManager
     public static void InitBlockmap(Vector2 size,Vector2 offset)
     {
         blockmapOffset = offset;
-        blockmap = new Dictionary<Vector2SByte, List<Thing>>();
+        blockmap.Clear();
 
         BlockmapManager.size = size;
 
@@ -26,6 +26,8 @@ public static class BlockmapManager
     {
         Vector2SByte placementInMap = new Vector2SByte((sbyte)((thing.GetPosition().X-blockmapOffset.X)/BlockWidth),(sbyte)((thing.GetPosition().Y-blockmapOffset.Y)/BlockHeight));
         Vector2SByte oldPlacementInMap = new Vector2SByte((sbyte)((oldPos.X-blockmapOffset.X)/BlockWidth),(sbyte)((oldPos.Y-blockmapOffset.Y)/BlockHeight));
+
+        if(!blockmap.ContainsKey(oldPlacementInMap) || !blockmap.ContainsKey(placementInMap)) return;
 
         if(blockmap[oldPlacementInMap].Contains(thing)) blockmap[oldPlacementInMap].Remove(thing);
         if(!blockmap[placementInMap].Contains(thing)) blockmap[placementInMap].Add(thing);
@@ -44,6 +46,8 @@ public static class BlockmapManager
     {
         sbyte bx = (sbyte)((float)(mapx-blockmapOffset.X)/BlockWidth);
         sbyte by = (sbyte)((float)(mapy-blockmapOffset.Y)/BlockWidth);
+
+        if(!blockmap.ContainsKey(new Vector2SByte(bx,by))) return null;
 
         return blockmap[new Vector2SByte(bx,by)].ToArray();
     }

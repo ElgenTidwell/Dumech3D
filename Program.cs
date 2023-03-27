@@ -69,20 +69,22 @@ public class Program
 	
 	Player playerObject;
 
-	public List<Thing> activeThings;
+	public List<Thing> activeThings = new List<Thing>();
 
 	public List<Tuple<Vector3,Tex>> screenTextures = new List<Tuple<Vector3, Tex>>();
 	static int waiting = 0;
 
 	public void LoadMap(string path)
 	{
+		lastFrameTime = 0;
+		currentFrameTime = 0;
 		Map map = MapLoader.r3m(path);
 		mapWidth  = map.width;
 		mapHeight = map.length;
 		mapLayers = map.height;
 		worldMap  = map.data;
 		currentMap = path;
-		activeThings = new List<Thing>();
+		activeThings.Clear();
 		activeThings.AddRange(map.things);
 
 		instance.playerObject = new Player();
@@ -153,7 +155,7 @@ public class Program
 			{
 				case PlayState.game:
 
-					RunGame(l);
+					RunGame(l, sequencer);
 
 				break;
 				
@@ -161,6 +163,7 @@ public class Program
 				{
 					if(Raylib.IsKeyPressed(KeyboardKey.KEY_PERIOD))						
 					{
+						sequencer.Play(midiFile,true);
 						l.Apply(instance);
 						instance.state = PlayState.game;
 						Raylib.DisableCursor();
@@ -193,13 +196,14 @@ public class Program
 		Raylib.CloseWindow();
 	}
 
-	static void RunGame(LevelEditor l)
+	static void RunGame(LevelEditor l, MidiFileSequencer s)
 	{
 		if(Raylib.IsKeyPressed(KeyboardKey.KEY_PERIOD))
 		{
 			instance.state = PlayState.leveleditor;
 			Raylib.EnableCursor();
 			l.Init(instance);
+			s.Stop();
 		}
 
 		Raylib.BeginDrawing();
@@ -285,7 +289,10 @@ public class Program
 
 		foreach(Thing t in activeThings)
 		{
+			if(t == plr) continue;
+
 			p_bobj bobj = (p_bobj)t.GetThinker();
+
 			if(bobj == null) continue;
 			if(bobj.sprite.colors == null) continue;
 			if(bobj.sprite.colors.Length == 0) continue;
