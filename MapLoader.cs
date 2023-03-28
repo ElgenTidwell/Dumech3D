@@ -67,9 +67,12 @@ public static class MapLoader
 
                     var t = IndexToThing(index);
                     t.SetPosition(new Vector3(float.Parse(bits[1]),float.Parse(bits[2]),float.Parse(bits[3])));
+                    t.angularDirection = float.Parse(bits[4]);
                     
                     if(index == 1)
+                    {
                         things.Insert(0,t);//player start is always first, this is to save speed.
+                    }
                     else
                         things.Add(t); //anything else goes after.
 
@@ -116,8 +119,8 @@ public static class MapLoader
         foreach(Thing thing in m.things)
         {
             //add THD plus a line break,
-            //then...       V--The thing id    V-- the x position      V-- the y position      V-- and the z
-            file += $"THD\n{thing.id} {thing.GetPosition().X} {thing.GetPosition().Y} {thing.GetPosition().Z}\n";
+            //then...       V--The thing id    V-- the x position      V-- the y position      V-- and the z        V-- now the direction
+            file += $"THD\n{thing.id} {thing.GetPosition().X} {thing.GetPosition().Y} {thing.GetPosition().Z} {thing.angularDirection}\n";
         }
 
         //hooplah!

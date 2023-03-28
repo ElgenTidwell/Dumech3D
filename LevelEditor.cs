@@ -97,6 +97,40 @@ public class LevelEditor
             }
         }
 
+
+        //TODO: Left panel (thing panel, top half placer)
+        {
+            
+        }
+        //UI for thing.
+        if(selectedThing >= 0)
+        {
+            Vector2 offsetPos = new Vector2(things[selectedThing].GetPosition().X*zoom+xoff,things[selectedThing].GetPosition().Y*zoom+yoff);
+
+            byte c = (byte)MathF.Abs(MathF.Sin(totalTime/10)*255);
+
+            //draw orientation.
+            float angle = things[selectedThing].angularDirection;
+
+            float xdir = MathF.Sin(angle*Mths.D2R)*45,ydir = MathF.Cos(angle*Mths.D2R)*45;
+
+            Vector2 endArrow =offsetPos+new Vector2(xdir,ydir)*zoom/150;
+
+            float thick = zoom/40;
+
+            Raylib.DrawLineEx(offsetPos,endArrow,thick,new Color(c,c,c,(byte)255));
+
+            Raylib.DrawLineEx(endArrow,endArrow + new Vector2(MathF.Sin((angle+135)*Mths.D2R)*zoom/15,MathF.Cos((angle+135)*Mths.D2R)*zoom/15),thick,new Color(c,c,c,(byte)255));
+            Raylib.DrawLineEx(endArrow,endArrow + new Vector2(MathF.Sin((angle-135)*Mths.D2R)*zoom/15,MathF.Cos((angle-135)*Mths.D2R)*zoom/15),thick,new Color(c,c,c,(byte)255));
+        
+            if(Raylib.IsKeyPressed(KeyboardKey.KEY_RIGHT)) things[selectedThing].angularDirection+=45;
+            if(Raylib.IsKeyPressed(KeyboardKey.KEY_LEFT)) things[selectedThing].angularDirection-=45;
+
+            things[selectedThing].angularDirection = Mths.Clamp(things[selectedThing].angularDirection,-180,180);
+
+            if(selectedThing == 0) things[selectedThing].angularDirection = 180;
+        }       
+
         if(Raylib.IsKeyPressed(KeyboardKey.KEY_UP)) activeLayer++;
         if(Raylib.IsKeyPressed(KeyboardKey.KEY_DOWN)) activeLayer--;
 
@@ -183,16 +217,6 @@ public class LevelEditor
                 copy.height --;
                 copy.data = Mths.ResizeArray(copy.data,copy.width,copy.length,copy.height);
             }
-        }
-
-        //TODO: Left panel (thing panel, top half placer)
-        {
-            
-        }
-        //Left panel (thing panel, bottom half editor)
-        if(selectedThing > 0)
-        {
-            
         }
     }
 }

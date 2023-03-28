@@ -16,12 +16,16 @@ namespace Thinkers
             P_Move(deltaTime);
         }
 
-        public void P_RecalculateDir()
+        public void P_RecalculateDir(bool allowPlayer = false)
         {
             if(myThing.id != 0)
             {
                 myThing.dirX = MathF.Sin(myThing.angularDirection*Mths.D2R);
                 myThing.dirY = MathF.Cos(myThing.angularDirection*Mths.D2R);
+            }
+            else if(allowPlayer)
+            {
+                ((p_playermobj)myThing.GetThinker()).P_UpdateRotation();
             }
         }
         public void P_Move(float deltaTime)

@@ -80,6 +80,26 @@ namespace Thinkers
 
             oldMousePos = newMousePos;
         }
+        public void P_UpdateRotation()
+        {
+            Player p = (Player)myThing;
+            float mxrotSpeed = (MathF.Acos(p.dirX)*Mths.R2D-p.angularDirection)*Mths.D2R; //the constant value is in radians/second
+            float myrotSpeed = 0; //the constant value is in radians/second
+
+            totalRot -= mxrotSpeed;
+
+            float _oldDirX = myThing.dirX;
+            p.dirX = myThing.dirX * MathF.Cos(mxrotSpeed) - p.dirY * MathF.Sin(mxrotSpeed);
+            p.dirY = _oldDirX * MathF.Sin(mxrotSpeed) + p.dirY * MathF.Cos(mxrotSpeed);
+
+            float _oldStrafeX = p.strafeX;
+            p.strafeX = p.strafeX * MathF.Cos(-mxrotSpeed) - p.strafeY * MathF.Sin(-mxrotSpeed);
+            p.strafeY = _oldStrafeX * MathF.Sin(-mxrotSpeed) + p.strafeY * MathF.Cos(-mxrotSpeed);
+
+            float _oldPlaneX = p.planeX;
+            p.planeX = p.planeX * MathF.Cos(mxrotSpeed) - p.planeY * MathF.Sin(mxrotSpeed);
+            p.planeY = _oldPlaneX * MathF.Sin(mxrotSpeed) + p.planeY * MathF.Cos(mxrotSpeed);
+        }
 
         void P_Input(float deltaTime)
         {
