@@ -320,8 +320,8 @@ public class Program
 
 		//  devZ is good for debugging culling and whatnot, so if you need to do that uncomment these two lines.
 
-		//if(Raylib.IsKeyDown(KeyboardKey.KEY_UP)) instance.devZ += 0.01f;
-		//if(Raylib.IsKeyDown(KeyboardKey.KEY_DOWN)) instance.devZ -= 0.01f;
+		if(Raylib.IsKeyDown(KeyboardKey.KEY_UP)) instance.devZ += 0.01f;
+		if(Raylib.IsKeyDown(KeyboardKey.KEY_DOWN)) instance.devZ -= 0.01f;
 
 		//  only enable this if shit gets weird with the blockmap
 
@@ -735,7 +735,11 @@ public class Program
 	//this doesnt really have to be a seperate function at the moment but there may be something later where this comes in handy.
 	void Raycast(int x)
 	{
-		for (int z = 0; z < mapLayers; z++)
+		for (int z = (int)activeThings[0].GetPosition().Z; z < mapLayers; z++)
+		{
+			SRay(x,z);
+		}
+		for (int z = (int)activeThings[0].GetPosition().Z-1; z >= 0; z--)
 		{
 			SRay(x,z);
 		}
@@ -942,7 +946,7 @@ public class Program
 					
 					finalEnd = drawEnd;
 				}
-
+				
 				void DrawY(int y,bool skipShade,float dist, bool wall = true,float distalongwall = 1)
 				{
 					//pinch top/bottom of screen to give a better illusion of looking up and down
@@ -988,7 +992,7 @@ public class Program
 						int p = (int)(y-updown) - screenHeight / 2;
 
 						// Vertical position of the camera.
-						float posZ = ((cameraOffset + devZ) - (z+(bottom?0:1)))*(screenHeight*0.5f);
+						float posZ = (cameraOffset - (z+(bottom?0:1)))*(screenHeight*0.5f);
 
 						// Horizontal distance from the camera to the floor for the current row.
 						float rowDistance = posZ / p;
@@ -1017,6 +1021,8 @@ public class Program
 						ty = Mths.Clamp(ty,0,texWidth-1);
 						texNum = Mths.Clamp(texNum,0,textures.Length-1);
 
+						//dist += MathF.Abs(rowDistance*2);
+
 						color = textures[texNum].colors[tx,ty];
 					}
 					if(zbuffer[_x, y] < dist || zFrontBuffer[_x, y] < dist) return;
@@ -1028,7 +1034,7 @@ public class Program
 					sideMulti *= distalongwall;
 
 					Color col = new Color((byte)(color.r *  sideMulti), (byte)(color.g * sideMulti), (byte)(color.b * sideMulti), color.a);
-					//if(!wall)col = new Color((byte)(dist), (byte)(dist), (byte)(dist), color.a);
+					//col = new Color((byte)(dist), (byte)(dist), (byte)(dist), color.a);
 
 					float totalLightOnPixel = 1;
 
@@ -1118,7 +1124,7 @@ public class Program
 						texNum = wasHit - 1;
 
 						float zfromy = (MathF.Abs((screenHeight/2)-((y-screenHeight)-updown))/screenHeight)*lastRayDist;
-						float zval = MathF.Abs((z+ceilz)-cameraOffset)*2 + rayDist;
+						float zval = rayDist+MathF.Abs((z+ceilz)-cameraOffset)*2;
 						DrawY(y,true,zval,false);
 					}
 				}

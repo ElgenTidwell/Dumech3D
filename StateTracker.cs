@@ -140,6 +140,12 @@ namespace States
             if(!actionStates.ContainsKey(action)) return;
             currentState = actionStates[action];
         }
+
+        public float GetDef(string def)
+        {
+            return definitions[def];
+        }
+
         public string FindStateByAction(string action)
         {
             return Array.Find(states.Keys.ToArray(),e=>states[e].stateAction == action);

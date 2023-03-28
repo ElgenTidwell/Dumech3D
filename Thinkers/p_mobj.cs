@@ -24,6 +24,8 @@ namespace Thinkers
             tracker.tick = (short)(pRandom.GetRandom()%3);
             Console.WriteLine(tracker.tick);
             tracker.onSpriteChanged += P_SprChange;
+
+            walkspeed = tracker.GetDef("walkspeed");
         }
         public override void T_Destroy()
         {
@@ -77,7 +79,7 @@ namespace Thinkers
         }
         void P_NewChaseDir()
         {
-            movecount = pRandom.GetRandom()&25;
+            movecount = pRandom.GetRandom()&15;
 
             Vector3 targetPos = Program.instance.activeThings[target].GetPosition();
 
