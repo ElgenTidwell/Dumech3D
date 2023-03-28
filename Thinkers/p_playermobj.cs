@@ -19,7 +19,7 @@ namespace Thinkers
 
         public p_playermobj()
         {
-            weapon = new StateTracker($"{Program.basePath}/States/shotgun.wtt", false,true);
+            weapon = new StateTracker($"{Program.basePath}/States/shotgun.wtt", false);
             weaponShoot = Raylib.LoadSound($"{Program.basePath}/Sounds/shotgun/shoot.mp3");
             P_ReloadWeaponData();
         }

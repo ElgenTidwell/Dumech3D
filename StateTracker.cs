@@ -30,7 +30,7 @@ namespace States
         public sbyte directionToCamera = -1;
         public Action onSpriteChanged;
 
-        public StateTracker(string path, bool isDirectional, bool loadAllTextures = false)
+        public StateTracker(string path, bool isDirectional, bool loadAllTextures = true)
         {
             this.isDirectional = isDirectional;
             myHash = path;

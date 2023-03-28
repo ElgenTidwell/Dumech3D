@@ -20,7 +20,7 @@ namespace Thinkers
         public p_mobj(string statePath)
         {
             string fullpath = $"{Program.basePath}/States/{statePath}.wtt";
-            tracker = new StateTracker(fullpath,true,true);
+            tracker = new StateTracker(fullpath,true);
             tracker.tick = (short)(pRandom.GetRandom()%3);
             Console.WriteLine(tracker.tick);
             tracker.onSpriteChanged += P_SprChange;
